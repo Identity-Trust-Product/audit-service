@@ -1,4 +1,39 @@
-ssaacreate table if not exists rsaudit (
+create table if not exists audit_records (
+  id varchar(128) primary key,
+  origin varchar(128) not null,
+  service_name varchar(128) not null,
+  actor_user_id varchar(256),
+  actor_role varchar(128),
+  action varchar(256) not null,
+  http_method varchar(32),
+  endpoint varchar(512),
+  entity_type varchar(128),
+  entity_id varchar(256),
+  organization_id varchar(128),
+  application_id varchar(128),
+  schema_id varchar(128),
+  schema_version_id varchar(128),
+  status varchar(64),
+  decision varchar(128),
+  request_body jsonb not null default '{}'::jsonb,
+  response_body jsonb not null default '{}'::jsonb,
+  metadata jsonb not null default '{}'::jsonb,
+  ip_address varchar(128),
+  user_agent text,
+  epoch_time bigint not null,
+  occurred_at timestamp not null
+);
+
+create index if not exists idx_audit_records_actor_time
+  on audit_records(actor_user_id, occurred_at desc);
+
+create index if not exists idx_audit_records_org_app_time
+  on audit_records(organization_id, application_id, occurred_at desc);
+
+create index if not exists idx_audit_records_action_time
+  on audit_records(action, occurred_at desc);
+
+create table if not exists rsaudit (
   id varchar(128) primary key,
   api varchar(512) not null,
   userid varchar(128) not null,
